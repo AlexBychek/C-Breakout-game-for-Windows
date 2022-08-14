@@ -50,7 +50,7 @@ void StatisticBreakout::writeGameResult()
 
 void StatisticPong::writeGameResult()
 {
-    string game_status = player1Scores > player2Scores ? "player 1 Win" : " player 2 Win";
+    string game_status = player1Scores > player2Scores ? "player 1 Win" : "player 2 Win";
     cout << " status:   " << game_status << endl;
     cout << " player 1: " << to_string(player1Scores) << " scores" <<  endl;
     cout << " player 2: " << to_string(player2Scores) << " scores" <<  endl;

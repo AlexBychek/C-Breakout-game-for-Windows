@@ -36,6 +36,8 @@ static constexpr int OFFSET_LEFT      = 20;
 static constexpr int OFFSET_TOP       = 40;
 static constexpr int BYTES_PER_PIXEL  = 4;
 
+static constexpr int PONG_WIN_COUNT   = 5;
+
 static const Vec2f INITIAL_BALL_VELOCITY(10.0f, -20.0f);
 static const int PLAYER_VELOCITY(25);
 

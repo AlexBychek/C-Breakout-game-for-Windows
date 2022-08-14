@@ -21,6 +21,40 @@ int paddingHeight = 130;
 
 using namespace std;
 
+void gameProcess( GameType type, HWND* consoleWindow )
+{
+    clearScreen();
+    showPongTitle();
+
+    bool game = true;
+    std::unique_ptr<Game> aGame;
+
+    if ( type == PONG )
+    {
+        aGame.reset( new Pong(consoleWindow) );
+    }
+    else
+    {
+        aGame.reset( new Breakout(consoleWindow) );
+    }
+
+    while (game)
+    {
+        aGame->updateFrame();
+        aGame->checkGameEnd(&game);
+        this_thread::sleep_for( 50ms );
+    }
+
+    auto statistic = aGame->getStatistic();
+
+    if (statistic)
+    {
+        clearScreen();
+        statistic->writeGameResult();
+    }
+}
+
+
 int main()
 {
     SetConsoleCP(1251);
@@ -41,49 +75,11 @@ int main()
         {
             case 1:
             {
-                clearScreen();
-                showPongTitle();
-
-                bool game = true;
-                std::unique_ptr<Game> aGame( new Pong(&consoleWindow) );
-
-                while (game)
-                {
-                    aGame->updateFrame();
-                    aGame->checkGameEnd(&game);
-                    this_thread::sleep_for( 50ms );
-                }
-
-                statistic = aGame->getStatistic();
-
-                if (statistic)
-                {
-                    clearScreen();
-                    statistic->writeGameResult();
-                }
+                gameProcess( PONG, &consoleWindow );
             } break;
             case 2:
             {
-                clearScreen();
-                showBreakoutTitle();
-
-                bool game = true;
-                std::unique_ptr<Game> aGame( new Breakout(&consoleWindow) );
-
-                while (game)
-                {
-                    aGame->updateFrame();
-                    aGame->checkGameEnd(&game);
-                    this_thread::sleep_for( 50ms );
-                }
-
-                statistic = aGame->getStatistic();
-
-                if (statistic)
-                {
-                    clearScreen();
-                    statistic->writeGameResult();
-                }
+                gameProcess( BREAKOUT, &consoleWindow );
             }
             case 3:
             {
