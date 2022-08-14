@@ -3,10 +3,7 @@
 //
 
 #include "Pong.h"
-
 #include <GameObjectCreator.h>
-#include <GameLevelsCreator.h>
-#include <HealthIcon.h>
 #include <DateTime.h>
 
 Pong::Pong( HWND* consoleWindow )
@@ -24,8 +21,6 @@ Pong::~Pong()
 
 void Pong::initializeGameObjects()
 {
-    levels_ = GameLevelsCreator::createGameLevels();
-
     player_ = std::make_unique< GameObject >(GameObjectCreator::createPerson( Vec2d( ( PMATRIX_WIDTH - 50), (PMATRIX_HEIGHT - START_Y) / 2 ), Vec2d( 20, 100 ) ) );
 
     player2_ = std::make_unique< GameObject >(GameObjectCreator::createPerson( Vec2d( 50 - 20, (PMATRIX_HEIGHT - START_Y) / 2 ), Vec2d( 20, 100 ) ) );

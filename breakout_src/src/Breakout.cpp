@@ -129,8 +129,6 @@ void Breakout::handleLogic()
         {
             if ( !object.isDestroy() )
             {
-                std::tuple< bool, Directions, Vec2f > collision = checkCollision(*ball_, object);
-
                 auto [ oCollision, oDirections, oDifference ] = checkCollision(*ball_, object);
 
                 if ( oCollision )

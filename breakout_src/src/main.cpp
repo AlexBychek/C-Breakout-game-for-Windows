@@ -6,11 +6,9 @@
 
 #include <iostream>
 
-#include <stdio.h>
 #include <Windows.h>
 #include <thread>
 #include <optional>
-#include <ctype.h>
 
 #include <Breakout.h>
 #include <Pong.h>
@@ -52,6 +50,9 @@ void gameProcess( GameType type, HWND* consoleWindow )
         clearScreen();
         statistic->writeGameResult();
     }
+
+    clearScreen();
+    showStatistic();
 }
 
 
@@ -80,7 +81,7 @@ int main()
             case 2:
             {
                 gameProcess( BREAKOUT, &consoleWindow );
-            }
+            } break;
             case 3:
             {
                 clearScreen();
