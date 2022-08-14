@@ -6,7 +6,9 @@
 #define BREAKOUT_RENDERER_H
 
 #include <Config.h>
+#include <Statistic.h>
 
+#include <memory>
 #include <Windows.h>
 #include <stdint.h>
 
@@ -14,15 +16,8 @@ enum GameType { PONG, BREAKOUT };
 
 class Renderer
 {
-    uint32_t   time_;
-    uint32_t   scores_;
-    uint32_t   level_;
-
-    uint32_t player1Scores_;
-    uint32_t player2Scores_;
-
-    GameType gameType_;
-
+    GameType                   gameType_;
+    std::shared_ptr<Statistic> statistic_;
 public:
     HWND*      mPConsoleWindow;
     HDC        deviceContext;
@@ -37,12 +32,7 @@ public:
     Renderer( HWND* consoleWindow, const GameType& gameType );
 
     void draw();
-    void setTimer(const uint32_t& time );
-    void setScores(const uint32_t& scores );
-    void setLevel(const uint32_t& level );
-
-    void setPlayer1Scores(const uint32_t& scores );
-    void setPlayer2Scores(const uint32_t& scores );
+    void setStatistic( std::shared_ptr<Statistic> statistic );
 };
 
 

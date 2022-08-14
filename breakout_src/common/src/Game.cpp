@@ -57,6 +57,45 @@ void Game::objectPositionUpdate( GameObject& obj )
     }
 }
 
+void Game::playerMoveUp( std::unique_ptr<GameObject>& player )
+{
+    int predictPosition = player->getPosition().y - player->getVelocity().y;
+
+    if ( predictPosition >= ::START_Y )
+    {
+        player->setYPosition( predictPosition );
+    }
+}
+
+void Game::playerMoveDown( std::unique_ptr<GameObject>& player )
+{
+    int predictPosition = (player->getPosition().y) + player->getVelocity().y;
+
+    if ( predictPosition <= (::PMATRIX_HEIGHT - 30) - player->getSize().y )
+    {
+        player->setYPosition( predictPosition );
+    }
+}
+
+void Game::playerMoveLeft( std::unique_ptr<GameObject>& player )
+{
+    int predictPosition = player->getPosition().x - player->getVelocity().x;
+
+    if (predictPosition >= ::START_X)
+    {
+        player->setXPosition( predictPosition );
+    }
+}
+
+void Game::playerMoveRight( std::unique_ptr<GameObject>& player )
+{
+    int predictPosition = player->getPosition().x + player->getVelocity().x;
+
+    if (predictPosition < ::PMATRIX_WIDTH - ::START_X - player->getSize().x)
+    {
+        player->setXPosition( predictPosition );
+    }
+}
 
 void Game::resetMainDigitalMatrix()
 {
@@ -110,6 +149,29 @@ std::tuple< bool, Directions, Vec2f > Game::checkCollision(BallObject& one, Game
 std::shared_ptr<Statistic> Game::getStatistic()
 {
     return statistic_;
+}
+
+bool Game::timeChecker()
+{
+    uint64_t now = getMills();
+
+    if ( now - initTime_ >= ::TIMEOUT_MS )
+    {
+        if ( gameStatus_ == STATUS_WAIT )
+        {
+            startTime_ = now;
+            gameStatus_ = STATUS_START;
+        }
+
+        statistic_->time = ((now - startTime_) / 1000);
+    }
+    else
+    {
+        statistic_->time = 3 - ((now - initTime_) / 1000);
+        return false;
+    }
+
+    return true;
 }
 
 Vec2f normalize( Vec2f a )

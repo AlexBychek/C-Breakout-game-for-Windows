@@ -8,3 +8,8 @@
     player 1 scores:  0
     player 2 scores:  5
     game time:        3
+2022-08-14 23:59:40
+    player 2 Win
+    player 1 scores:  0
+    player 2 scores:  5
+    game time:        18

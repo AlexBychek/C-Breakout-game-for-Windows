@@ -13,6 +13,7 @@ Breakout::Breakout( HWND* consoleWindow )
     : Game( consoleWindow, BREAKOUT )
 {
     statistic_.reset( new StatisticBreakout() );
+    renderer_->setStatistic( statistic_ );
     initializeGameObjects();
 }
 
@@ -33,7 +34,7 @@ void Breakout::initializeGameObjects()
 
 void Breakout::objectsPositionUpdate()
 {
-    for (auto& object : levels_[statistic_->levelNo].getBricks())
+    for ( auto& object : levels_[statistic_->levelNo].getBricks() )
     {
         if (!object.isDestroy())
         {
@@ -56,24 +57,13 @@ void Breakout::draw()
 
 void Breakout::handleInput()
 {
-    int predictPosition;
-    if (GetAsyncKeyState(VK_LEFT))
+    if ( GetAsyncKeyState(VK_LEFT) )
     {
-        predictPosition = player_->getPosition().x - player_->getVelocity().x;
-
-        if (predictPosition >= ::START_X)
-        {
-            player_->setXPosition( predictPosition );
-        }
+        playerMoveLeft( player_ );
     }
-    else if (GetAsyncKeyState(VK_RIGHT))
+    else if ( GetAsyncKeyState(VK_RIGHT) )
     {
-        predictPosition = player_->getPosition().x + player_->getVelocity().x;
-
-        if (predictPosition < ::PMATRIX_WIDTH - ::START_X - player_->getSize().x)
-        {
-            player_->setXPosition( predictPosition );
-        }
+        playerMoveRight( player_ );
     }
 }
 
@@ -87,7 +77,7 @@ void Breakout::healthChecker()
         player_->reset();
         initTime_ = getMills();
 
-        if (statistic_->healthPoint == 0)
+        if ( statistic_->healthPoint == 0 )
         {
             gameStatus_ = STATUS_END;
             statistic_->lose = true;
@@ -95,37 +85,11 @@ void Breakout::healthChecker()
     }
 }
 
-bool Breakout::timeChecker()
-{
-    uint64_t now = getMills();
-
-    if (now - initTime_ >= ::TIMEOUT_MS)
-    {
-        if (gameStatus_ == STATUS_WAIT)
-        {
-            startTime_ = now;
-            gameStatus_ = STATUS_START;
-        }
-
-        statistic_->time = ((now - startTime_) / 1000);
-    }
-    else
-    {
-        statistic_->time = 3 - ((now - initTime_) / 1000);
-        renderer_->setTimer(statistic_->time);
-        return false;
-    }
-
-    renderer_->setTimer(statistic_->time);
-
-    return true;
-}
-
 void Breakout::levelChecker()
 {
     if (!levels_[statistic_->levelNo].getActiveBricks())
     {
-        if (statistic_->levelNo < levels_.size() - 1)
+        if ( statistic_->levelNo < levels_.size() - 1 )
         {
             ++statistic_->levelNo;
             player_->reset();
@@ -148,12 +112,14 @@ void Breakout::updateFrame()
 
 void Breakout::handleLogic()
 {
-    renderer_->setScores(statistic_->scores);
-    renderer_->setLevel(statistic_->levelNo + 1);
-
     healthChecker();
 
-    if (timeChecker())
+    if ( gameStatus_ == STATUS_END )
+    {
+        return;
+    }
+
+    if ( timeChecker() )
     {
         levelChecker();
 
@@ -161,26 +127,26 @@ void Breakout::handleLogic()
 
         for (auto& object : levels_[statistic_->levelNo].getBricks())
         {
-            if (!object.isDestroy())
+            if ( !object.isDestroy() )
             {
                 std::tuple< bool, Directions, Vec2f > collision = checkCollision(*ball_, object);
-                Directions dir = std::get<1>(collision);
-                Vec2f diffVector = std::get<2>(collision);
 
-                if (std::get<0>( collision ))
+                auto [ oCollision, oDirections, oDifference ] = checkCollision(*ball_, object);
+
+                if ( oCollision )
                 {
                     if (object.getHealthPoint() > 1)
                     {
-                        if (dir == DIRECTION_LEFT || dir == DIRECTION_RIGHT)
+                        if ( oDirections == DIRECTION_LEFT || oDirections == DIRECTION_RIGHT )
                         {
                             if (object.getHealthPoint() > 2)
                             {
                                 ball_->setYVelocity( -ball_->getVelocity().y );
                             }
                             ball_->setXVelocity( -ball_->getVelocity().x );
-                            float penetration = ball_->getRadius() - std::abs(diffVector.x);
+                            float penetration = ball_->getRadius() - std::abs(oDifference.x);
 
-                            if (dir == DIRECTION_LEFT)
+                            if ( oDirections == DIRECTION_LEFT )
                             {
                                 ball_->setXPosition( ball_->getPosition().x + penetration );
                             }
@@ -196,8 +162,8 @@ void Breakout::handleLogic()
                                 ball_->setXVelocity( -ball_->getVelocity().x );
                             }
                             ball_->setYVelocity( -ball_->getVelocity().y );
-                            float penetration = ball_->getRadius() - std::abs(diffVector.y);
-                            if (dir == DIRECTION_UP)
+                            float penetration = ball_->getRadius() - std::abs(oDifference.y);
+                            if ( oDirections == DIRECTION_UP )
                             {
                                 ball_->setYPosition( ball_->getPosition().y - penetration );
                             }
@@ -225,9 +191,9 @@ void Breakout::handleLogic()
             }
         }
 
-        std::tuple< bool, Directions, Vec2f > result = checkCollision(*ball_, *player_);
+        auto [ pCollision, pDirections, pDifference  ] = checkCollision(*ball_, *player_);
 
-        if (std::get<0>(result))
+        if ( pCollision )
         {
             float centerBoard = player_->getPosition().x + player_->getSize().x / 2.0f;
             float distance = (ball_->getPosition().x + ball_->getRadius()) - centerBoard;
@@ -248,15 +214,15 @@ void Breakout::handleLogic()
 
 void Breakout::healthIconDraw()
 {
-    for (int i = 0; i < statistic_->healthPoint; ++i)
+    for ( int i = 0; i < statistic_->healthPoint; ++i )
     {
         int healthStartPositionX = 20 + i * 20;
 
-        for (int y = 0; y < 20; ++y)
+        for ( int y = 0; y < 20; ++y )
         {
-            for (int x = 0; x < 20; ++x)
+            for ( int x = 0; x < 20; ++x )
             {
-                if (healthIconPatternArray[20 * y + x ] != 0)
+                if ( healthIconPatternArray[20 * y + x ] != 0 )
                 {
                     renderer_->mainDigitalMatrix[(y + 20) * ::PMATRIX_WIDTH + healthStartPositionX + x] = RGB(255, 0, 0);
                 }
@@ -267,7 +233,7 @@ void Breakout::healthIconDraw()
 
 void Breakout::checkGameEnd( bool* game )
 {
-    if (gameStatus_ == STATUS_END)
+    if ( gameStatus_ == STATUS_END )
     {
         *game = false;
         draw();

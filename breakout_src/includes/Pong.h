@@ -29,7 +29,6 @@ protected:
 
     void healthIconDraw() override;
     void healthChecker() override;
-    bool timeChecker() override;
     void levelChecker() override;
 };
 

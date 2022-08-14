@@ -9,11 +9,6 @@
 Renderer::Renderer( HWND* consoleWindow, const GameType& gameType )
         : mPConsoleWindow(consoleWindow )
         , gameType_( gameType )
-        , time_( 0 )
-        , scores_( 0 )
-        , level_( 0 )
-        , player1Scores_( 0 )
-        , player2Scores_( 0 )
 {
     bitmapInfo.bmiHeader.biSize        = sizeof(bitmapInfo.bmiHeader);
     bitmapInfo.bmiHeader.biWidth       = PMATRIX_WIDTH;
@@ -74,12 +69,12 @@ void Renderer::draw()
     hFont = static_cast<HFONT>(GetStockObject(SYSTEM_FIXED_FONT));
     SelectObject(deviceContext, hFont);
 
-    std::string sTimer  = "Timer = " + std::to_string( time_ );
+    std::string sTimer  = "Timer = " + std::to_string( statistic_->time );
 
     if (gameType_ == BREAKOUT)
     {
-        std::string sScores = "Scores = " + std::to_string( scores_ );
-        std::string sLevel  = "Level = " + std::to_string( level_ );
+        std::string sScores = "Scores = " + std::to_string( statistic_->scores );
+        std::string sLevel  = "Level = " + std::to_string( statistic_->levelNo );
 
         TextOut(deviceContext, PMATRIX_WIDTH / 4, 55, sTimer.c_str(), sTimer.size());
         TextOut(deviceContext, PMATRIX_WIDTH / 4, 75, sScores.c_str(), sScores.size());
@@ -87,8 +82,8 @@ void Renderer::draw()
     }
     else
     {
-        std::string sScores = "player 1 = " + std::to_string( player1Scores_ );
-        std::string sLevel  = "player 2 = " + std::to_string( player2Scores_ );
+        std::string sScores = "player 1 = " + std::to_string( statistic_->player1Scores );
+        std::string sLevel  = "player 2 = " + std::to_string( statistic_->player2Scores );
 
         TextOut(deviceContext, PMATRIX_WIDTH / 2, 55, sTimer.c_str(), sTimer.size());
         TextOut(deviceContext, PMATRIX_WIDTH / 4, 75, sScores.c_str(), sScores.size());
@@ -100,28 +95,7 @@ void Renderer::draw()
     ReleaseDC(*mPConsoleWindow, deviceContext);
 }
 
-void Renderer::setTimer( const uint32_t& time )
+void Renderer::setStatistic( std::shared_ptr<Statistic> statistic )
 {
-    time_ = time;
+    statistic_ = statistic;
 }
-
-void Renderer::setScores( const uint32_t& scores )
-{
-    scores_ = scores;
-}
-
-void Renderer::setLevel( const uint32_t& level )
-{
-    level_ = level;
-}
-
-void Renderer::setPlayer1Scores(const uint32_t& scores )
-{
-    player1Scores_ = scores;
-}
-
-void Renderer::setPlayer2Scores(const uint32_t& scores )
-{
-    player2Scores_ = scores;
-}
-

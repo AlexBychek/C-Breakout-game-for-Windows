@@ -45,6 +45,11 @@ protected:
     virtual void handleInput() = 0;
     virtual void handleLogic() = 0;
 
+    virtual void playerMoveUp( std::unique_ptr<GameObject>& player );
+    virtual void playerMoveDown( std::unique_ptr<GameObject>& player );
+    virtual void playerMoveLeft( std::unique_ptr<GameObject>& player );
+    virtual void playerMoveRight( std::unique_ptr<GameObject>& player );
+
     virtual void initializeGameObjects() = 0;
     virtual void resetMainDigitalMatrix();
 
@@ -53,7 +58,7 @@ protected:
 
     virtual void healthIconDraw() = 0;
     virtual void healthChecker() = 0;
-    virtual bool timeChecker() = 0;
+    virtual bool timeChecker();
     virtual void levelChecker() = 0;
 
     virtual std::tuple< bool, Directions, Vec2f > checkCollision(BallObject& one, GameObject& two );

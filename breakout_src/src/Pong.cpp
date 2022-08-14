@@ -13,6 +13,7 @@ Pong::Pong( HWND* consoleWindow )
         : Game( consoleWindow, PONG )
 {
     statistic_.reset( new StatisticPong() );
+    renderer_->setStatistic( statistic_ );
     initializeGameObjects();
 }
 
@@ -53,50 +54,26 @@ void Pong::draw()
 
 void Pong::handleInput()
 {
-    int predictPosition;
     if ( GetAsyncKeyState(VK_NUMPAD8) )
     {
-        predictPosition = player_->getPosition().y - player_->getVelocity().y;
-
-        if ( predictPosition >= ::START_Y )
-        {
-            player_->setYPosition( predictPosition );
-        }
+        playerMoveUp( player_ );
     }
     else if ( GetAsyncKeyState(VK_NUMPAD2) )
     {
-        predictPosition = (player_->getPosition().y) + player_->getVelocity().y;
-
-        if ( predictPosition <= (::PMATRIX_HEIGHT - 30) - player_->getSize().y )
-        {
-            player_->setYPosition( predictPosition );
-        }
+        playerMoveDown( player_ );
     }
-
     if ( GetAsyncKeyState(VK_UP) )
     {
-        predictPosition = player2_->getPosition().y - player2_->getVelocity().y;
-
-        if ( predictPosition >= ::START_Y )
-        {
-            player2_->setYPosition( predictPosition );
-        }
+        playerMoveUp( player2_ );
     }
     else if ( GetAsyncKeyState(VK_DOWN) )
     {
-        predictPosition = (player2_->getPosition().y) + player2_->getVelocity().y;
-
-        if ( predictPosition <= (::PMATRIX_HEIGHT - 30) - player2_->getSize().y )
-        {
-            player2_->setYPosition( predictPosition );
-        }
+        playerMoveDown( player2_ );
     }
-
 }
 
 void Pong::healthChecker()
 {
-
     if ( ball_->getPosition().x + ball_->getSize().x >= ::PMATRIX_WIDTH - ::PMATRIX_BORDER )
     {
         ball_->reset();
@@ -109,6 +86,7 @@ void Pong::healthChecker()
     {
         ball_->reset();
         player_->reset();
+        ball_->setXVelocity( -ball_->getVelocity().x );
         player2_->reset();
         initTime_ = getMills();
         ++statistic_->player2Scores;
@@ -118,32 +96,6 @@ void Pong::healthChecker()
     {
         gameStatus_ = STATUS_END;
     }
-}
-
-bool Pong::timeChecker()
-{
-    uint64_t now = getMills();
-
-    if (now - initTime_ >= ::TIMEOUT_MS)
-    {
-        if ( gameStatus_ == STATUS_WAIT )
-        {
-            startTime_ = now;
-            gameStatus_ = STATUS_START;
-        }
-
-        statistic_->time = ((now - startTime_) / 1000);
-    }
-    else
-    {
-        statistic_->time = 3 - ((now - initTime_) / 1000);
-        renderer_->setTimer(statistic_->time);
-        return false;
-    }
-
-    renderer_->setTimer(statistic_->time);
-
-    return true;
 }
 
 void Pong::levelChecker()
@@ -175,23 +127,25 @@ void Pong::handleLogic()
 {
     healthChecker();
 
-    renderer_->setPlayer1Scores( statistic_->player1Scores );
-    renderer_->setPlayer2Scores( statistic_->player2Scores );
+    if ( gameStatus_ == STATUS_END )
+    {
+        return;
+    }
 
     if ( timeChecker() )
     {
         ball_->move();
 
-        std::tuple< bool, Directions, Vec2f > result = checkCollision(*ball_, *player_);
+        auto [ pCollision, pDirections, pDifference  ] = checkCollision(*ball_, *player_);
 
-        if ( std::get<0>(result) )
+        if ( pCollision )
         {
             updateBallVelocity(player_, ball_);
         }
 
-        std::tuple< bool, Directions, Vec2f > result2 = checkCollision(*ball_, *player2_);
+        auto [ p2Collision2, p2Directions2, p2Difference ] = checkCollision(*ball_, *player2_);
 
-        if ( std::get<0>(result2) )
+        if ( p2Collision2 )
         {
             updateBallVelocity(player2_, ball_);
         }
@@ -204,7 +158,7 @@ void Pong::healthIconDraw()
 
 void Pong::checkGameEnd( bool* game )
 {
-    if (gameStatus_ == STATUS_END)
+    if ( gameStatus_ == STATUS_END )
     {
         *game = false;
         draw();
